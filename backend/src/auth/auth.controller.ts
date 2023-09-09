@@ -11,5 +11,4 @@ export async function signup(req: Request, res: Response) {
   }
 
   // encrypt password
-  
 }

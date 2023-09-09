@@ -1,4 +1,4 @@
-import { User } from '../dbModels/user';
+import { User } from '../db/models/user';
 
 export function isUser(user: Record<string, any>): user is User {
   return (
