@@ -10,7 +10,7 @@ app.post('/auth*', authRouter);
 // Start the express app
 if (process.env.PROJECT_ENV === 'dev') {
   app.listen(process.env.PORT, () => {
-    console.log('App listening on', process.env.PORT);
+    console.log('\n\x1b[96mApp listening on', process.env.PORT, '\x1b[0m\n');
   });
 } else {
   // TODO

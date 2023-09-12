@@ -52,3 +52,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
   res.cookie('authToken', token, { maxAge: 9000000000, httpOnly: true, secure: true });
   res.send(tokenData);
 }
+
+export async function login(req: Request, res: Response, next: NextFunction) {
+  
+}
