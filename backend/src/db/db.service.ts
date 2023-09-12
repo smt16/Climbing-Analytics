@@ -4,11 +4,6 @@ import { Db, Document, InsertOneResult, MongoClient, MongoServerError, WithId } 
 type collection =
   'users'
 
-export type dbError = {
-  code: string | number | undefined,
-  keyValue?: Record<string, any>
-}
-
 export default class DB {
   private static client: MongoClient;
 
@@ -23,7 +18,10 @@ export default class DB {
   /**
   * Get one row from the DB
   */
-  public static async getOne(collection: collection, query: Record<string, any>): Promise<WithId<Document> | null | dbError> {
+  public static async getOne(
+    collection: collection,
+    query: Record<string, any>,
+  ): Promise<WithId<Document> | null | MongoServerError> {
     try {
       await this.connect();
 
@@ -31,11 +29,7 @@ export default class DB {
 
       return coll.findOne(query);
     } catch (e) {
-      const err = e as MongoServerError;
-
-      return {
-        code: err.code,
-      };
+      return e as MongoServerError;
     } finally {
       await this.client.close();
     }
@@ -44,7 +38,10 @@ export default class DB {
   /**
   * Insert a single row into a DB collection
   */
-  public static async insert(collection: string, data: Record<string, any>): Promise<InsertOneResult<Document> | dbError> {
+  public static async insert(
+    collection: string,
+    data: Record<string, any>,
+  ): Promise<InsertOneResult<Document> | MongoServerError> {
     try {
       await this.connect();
 
@@ -54,12 +51,7 @@ export default class DB {
 
       return res;
     } catch (e) {
-      const err = e as MongoServerError;
-
-      return {
-        code: err.code,
-        keyValue: err.keyValue,
-      };
+      return e as MongoServerError;
     } finally {
       await this.client.close();
     }

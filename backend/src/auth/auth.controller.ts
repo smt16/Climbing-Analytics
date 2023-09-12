@@ -1,20 +1,20 @@
-import { Request, Response } from 'express';
-import { Document, InsertOneResult } from 'mongodb';
+import { NextFunction, Request, Response } from 'express';
+import { Document, InsertOneResult, MongoServerError } from 'mongodb';
 import { isUser } from '../helpers/type.helper';
 import { clientError } from '../helpers/response.helper';
 import { hashPassword, signToken } from '../helpers/crypto.helper';
 import { MongoErrorCodes } from '../enums';
-import DB, { dbError } from '../db/db.service';
+import DB from '../db/db.service';
 
 /**
  * Creates a new user
  */
-export async function signup(req: Request, res: Response) {
+export async function signup(req: Request, res: Response, next: NextFunction) {
   const userData = req.body;
 
   // validate user object
   if (!isUser(userData)) {
-    return clientError(res, 'Invalid user data');
+    return clientError(res, next, 'Invalid user data');
   }
 
   // encrypt password
@@ -29,22 +29,26 @@ export async function signup(req: Request, res: Response) {
   const dbResposne = await DB.insert('users', userData);
 
   // error handling
-  const potentialError = dbResposne as dbError;
+  const potentialError = dbResposne as MongoServerError;
   if (potentialError.code === MongoErrorCodes.unique_key_violation) {
-    return clientError(res, { message: 'User with that email already exists.' });
+    return clientError(res, next, { message: 'User with that email already exists.' }, potentialError);
   }
 
   if (potentialError.code) {
-    return clientError(res, { message: 'Unable to create user.' });
+    return clientError(res, next, { message: 'Unable to create user.' }, potentialError);
   }
 
   // inserted successfully
   const insertedUser = dbResposne as InsertOneResult<Document>;
 
   // create user auth token
-  const tokenData = { ...userData, id: insertedUser.insertedId };
+  const tokenData = {
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    id: insertedUser.insertedId,
+  };
   const token = signToken(tokenData);
-
-  res.cookie('authToken', JSON.stringify(token));
-  res.send(dbResposne);
+  res.cookie('authToken', token, { maxAge: 9000000000, httpOnly: true, secure: true });
+  res.send(tokenData);
 }

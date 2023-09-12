@@ -12,6 +12,7 @@
   "dependencies": {
     "bcryptjs": "*",
     "body-parser": "*",
+    "cookie-parser": "^1.4.6",
     "cors": "*",
     "dotenv": "*",
     "express": "*",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "*",
+    "@types/cookie-parser": "^1.4.4",
     "@types/cors": "*",
     "@types/express": "*",
     "@types/jsonwebtoken": "*",

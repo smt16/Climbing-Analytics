@@ -22,5 +22,6 @@ module.exports = {
       '@typescript-eslint/no-shadow': 'warn',
       '@typescript-eslint/no-explicit-any': 'off',
       'prefer-destructuring': ['error', { object: true, array: false }],
+      'semi': 'always'
     }
 };

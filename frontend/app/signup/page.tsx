@@ -10,11 +10,18 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { post } from '@/src/http.service';
 import { LoadingButton } from '@mui/lab';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [userAlreadyExists, setUserAlreadyExists] = useState(false);
+  const router = useRouter();
+
+  const handleSetUserAlreadyExists = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    event.preventDefault();
+    setUserAlreadyExists(false);
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,11 +37,13 @@ export default function SignUp() {
     
     await post('/auth/signup', data)
       .then(res => {
+        sessionStorage.setItem('user', JSON.stringify(res?.data));
         setLoading(false);
-        console.log('RES', res)
+        router.push('/dashboard');
       })
       .catch(error => {
         setLoading(false);
+        console.error(error)
         if (error.response.data.message === 'User with that email already exists.') {
           setUserAlreadyExists(true);
         }
@@ -91,6 +100,7 @@ export default function SignUp() {
                 autoComplete="email"
                 error={userAlreadyExists}
                 helperText={ userAlreadyExists ? 'User already exists with that email' : '' }
+                onChange={handleSetUserAlreadyExists}
               />
             </Grid>
             <Grid item xs={12}>
