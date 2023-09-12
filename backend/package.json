@@ -10,15 +10,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "*",
     "body-parser": "*",
+    "cors": "*",
     "dotenv": "*",
     "express": "*",
-    "mongodb": "^6.0.0"
+    "jsonwebtoken": "*",
+    "mongodb": "*"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "*",
+    "@types/cors": "*",
     "@types/express": "*",
+    "@types/jsonwebtoken": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint": "*",

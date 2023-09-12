@@ -1,31 +1,24 @@
-import bcrypt from 'bcryptjs';
+import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
+/**
+ * Generate hashed passwords
+ */
 export function hashPassword(password: string): string {
-  let hashedPassword: string;
+  const salt = genSaltSync(10);
+  return hashSync(password, salt);
+}
 
-  // Encryption of the string password
-  bcrypt.genSalt(10, (_err, Salt) => {
-    // The bcrypt is used for encrypting password.
-    bcrypt.hash(password, Salt, (err, hash) => {
-      if (err) {
-        console.error(err);
-        return 'Cannot encrypt';
-      }
+/**
+ * Compare decrypted and encrypted passwords
+ */
+export function checkPassword(hashedPassword: string, rawPassword: string): boolean {
+  return compareSync(rawPassword, hashedPassword);
+}
 
-      hashedPassword = hash;
-
-      // confirm password was encrypted correctly
-      bcrypt.compare(
-        password,
-        hashedPassword,
-        async (error, isMatch) => {
-          if (!isMatch) {
-            // If password doesn't match the following
-            // message will be sent
-            throw new Error(`${hashedPassword} is not encryption of ${password}`);
-          }
-        },
-      );
-    });
-  });
+/**
+ * Sign JSON web token
+ */
+export function signToken(payload: Record<string, any>) {
+  return sign(payload, process.env.AUTH_SECRET as string, { expiresIn: '72h' });
 }

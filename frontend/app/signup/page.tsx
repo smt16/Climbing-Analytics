@@ -14,6 +14,7 @@ import { useState } from 'react';
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
+  const [userAlreadyExists, setUserAlreadyExists] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -21,16 +22,23 @@ export default function SignUp() {
     const data = {
       email: form.get('email'),
       password: form.get('password'),
-      firstName: form.get('firtName'),
+      firstName: form.get('firstName'),
       lastName: form.get('lastName')
     };
     
     setLoading(true);
-
-    const res = await post('/signup', data);
-
-    console.log(res);
-    setLoading(false);
+    
+    await post('/auth/signup', data)
+      .then(res => {
+        setLoading(false);
+        console.log('RES', res)
+      })
+      .catch(error => {
+        setLoading(false);
+        if (error.response.data.message === 'User with that email already exists.') {
+          setUserAlreadyExists(true);
+        }
+      })
   };
 
   return (
@@ -81,6 +89,8 @@ export default function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                error={userAlreadyExists}
+                helperText={ userAlreadyExists ? 'User already exists with that email' : '' }
               />
             </Grid>
             <Grid item xs={12}>

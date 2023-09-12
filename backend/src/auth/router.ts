@@ -5,7 +5,7 @@ export async function authRouter(req: Request, res: Response) {
   const { path } = req;
   switch (path) {
     case '/auth/signup':
-      signup(req, res);
+      await signup(req, res);
       break;
 
     default:

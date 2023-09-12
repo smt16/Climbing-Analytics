@@ -42,6 +42,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'prefer-destructuring': ['error', { object: true, array: false }],
     'consistent-return': 'off',
+    'dot-notation': 'off',
+    'no-extra-semi': 'off',
   },
   settings: {
     'import/resolver': {
