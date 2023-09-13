@@ -2,9 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 import { Document, InsertOneResult, MongoServerError } from 'mongodb';
 import { isUser } from '../helpers/type.helper';
 import { clientError } from '../helpers/response.helper';
-import { hashPassword, signToken } from '../helpers/crypto.helper';
+import { checkPassword, hashPassword } from '../helpers/crypto.helper';
 import { MongoErrorCodes } from '../enums';
 import DB from '../db/db.service';
+import { setAuthToken } from './auth.util';
 
 /**
  * Creates a new user
@@ -40,19 +41,44 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
 
   // inserted successfully
   const insertedUser = dbResposne as InsertOneResult<Document>;
-
-  // create user auth token
   const tokenData = {
     firstName: userData.firstName,
     lastName: userData.lastName,
     email: userData.email,
     id: insertedUser.insertedId,
   };
-  const token = signToken(tokenData);
-  res.cookie('authToken', token, { maxAge: 9000000000, httpOnly: true, secure: true });
+  setAuthToken(res, tokenData);
+
   res.send(tokenData);
 }
 
+/**
+ * Login for user
+ */
 export async function login(req: Request, res: Response, next: NextFunction) {
-  
+  const { body } = req;
+
+  // fetch user from DB
+  const user = await DB.getOne(next, 'users', { email: body.email });
+
+  // if user not found return error
+  if (!user) {
+    return clientError(res, next, 'Invalid username or password');
+  }
+
+  // if passwords do not match return error
+  if (!checkPassword(user.password, body.password)) {
+    return clientError(res, next, 'Invalid username or password');
+  }
+
+  // passwords matched
+  const tokenData = {
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    id: user['_id'],
+  };
+  setAuthToken(res, tokenData);
+
+  res.send(tokenData);
 }

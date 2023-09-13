@@ -12,6 +12,7 @@ import { post } from '@/src/http.service';
 import { LoadingButton } from '@mui/lab';
 import { ChangeEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AppBar } from '@mui/material';
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
@@ -25,6 +26,7 @@ export default function SignUp() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
     const form = new FormData(event.currentTarget);
     const data = {
       email: form.get('email'),
@@ -32,8 +34,6 @@ export default function SignUp() {
       firstName: form.get('firstName'),
       lastName: form.get('lastName')
     };
-    
-    setLoading(true);
     
     await post('/auth/signup', data)
       .then(res => {
@@ -52,6 +52,9 @@ export default function SignUp() {
 
   return (
     <Container component="main" maxWidth="xs">
+      <AppBar position='static' style={{ display: 'flex', justifyContent: 'left' }}>
+        <Typography variant='h2' marginLeft={'2vw'}>Climbing Analytics</Typography>
+      </AppBar>
       <CssBaseline />
       <Box
         sx={{

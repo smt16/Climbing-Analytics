@@ -1,3 +1,4 @@
+import { NextFunction } from 'express';
 import { Db, Document, InsertOneResult, MongoClient, MongoServerError, WithId } from 'mongodb';
 
 // All DB collections for collection arg types
@@ -19,17 +20,20 @@ export default class DB {
   * Get one row from the DB
   */
   public static async getOne(
+    next: NextFunction,
     collection: collection,
     query: Record<string, any>,
-  ): Promise<WithId<Document> | null | MongoServerError> {
+  ): Promise<WithId<Document> | null | void> {
     try {
       await this.connect();
 
       const coll = this.db.collection(collection);
 
-      return coll.findOne(query);
+      const res = await coll.findOne(query);
+
+      return res;
     } catch (e) {
-      return e as MongoServerError;
+      next(e);
     } finally {
       await this.client.close();
     }

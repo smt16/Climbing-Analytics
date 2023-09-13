@@ -1,6 +1,5 @@
 'use client'
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -11,19 +10,49 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import { post } from '@/src/http.service';
+import { ChangeEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { LoadingButton, Alert } from '@mui/lab';
+import { AppBar } from '@mui/material';
 
 export default function login() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [invalidDetails, setInvalidDetails] = useState(false);
+  const router = useRouter();
+
+  const handleSetInvalidDetails = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    setInvalidDetails(false);
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const loginData = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+    }
+
+    await post('/auth/login', loginData)
+      .then(res => {
+        sessionStorage.setItem('user', JSON.stringify(res?.data));
+        setLoading(false);
+        router.push('/dashboard');
+      })
+      .catch(err => {
+        console.log(err);
+        setInvalidDetails(true);
+        setLoading(false);
+      })
   };
 
   return (
     <Container component="main" maxWidth="xs">
+      <AppBar position='static' style={{ display: 'flex', justifyContent: 'left' }}>
+        <Typography variant='h2' marginLeft={'2vw'}>Climbing Analytics</Typography>
+      </AppBar>
       <CssBaseline />
       <Box
         sx={{
@@ -59,19 +88,24 @@ export default function login() {
             type="password"
             id="password"
             autoComplete="current-password"
+            onChange={handleSetInvalidDetails}
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
-          <Button
+          {invalidDetails &&
+            <Alert severity="error">Invalid username or password</Alert>
+          }
+          <LoadingButton
+            loading={loading}
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Sign In
-          </Button>
+            Sign Up
+          </LoadingButton>
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
